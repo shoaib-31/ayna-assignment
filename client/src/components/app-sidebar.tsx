@@ -1,7 +1,8 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import { Calendar, Home, Inbox, LogOut, Search, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -41,6 +42,10 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const handleLogout = async () => {
+    await localStorage.removeItem("jwt");
+    window.location.href = "/auth";
+  };
   return (
     <Sidebar className=" h-[100dvh]" collapsible="icon">
       <SidebarContent>
@@ -63,6 +68,15 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <button
+          onClick={handleLogout}
+          className="w-full py-2 flex gap-2 items-center text-sm text-gray-700 hover:text-black"
+        >
+          <LogOut className="size-4" />
+          Logout
+        </button>
+      </SidebarFooter>
     </Sidebar>
   );
 }

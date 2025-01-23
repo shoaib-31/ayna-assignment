@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:1337", // Replace with your Strapi server URL
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL, // Replace with your Strapi server URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("jwt");
 
       // Redirect the user to the login page
-      window.location.href = "/login";
+      window.location.href = "/auth";
     }
 
     // Reject the error so it can be handled elsewhere

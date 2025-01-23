@@ -14,7 +14,6 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
-import axiosInstance from "@/lib/axiosInstance";
 import { useRouter } from "next/navigation";
 // Define Zod schema for validation
 const loginSchema = z.object({
@@ -35,10 +34,20 @@ const Login = () => {
   const router = useRouter();
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
-      const response = await axiosInstance.post("/api/auth/local", {
-        identifier: values.email,
-        password: values.password,
-      });
+      const bakcendUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+      console.log("Backend URL:", bakcendUrl);
+      const response = await axios.post(
+        `${bakcendUrl}/api/auth/local`,
+        {
+          identifier: values.email,
+          password: values.password,
+        },
+        {
+          headers: {
+            Authorization: null,
+          },
+        }
+      );
 
       const { jwt, user } = response.data;
 

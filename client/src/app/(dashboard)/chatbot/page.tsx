@@ -97,22 +97,30 @@ const Page = () => {
             animate={{ opacity: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0.2, filter: "blur(20px)" }}
             transition={{ duration: 0.3 }}
-            className=" flex flex-col items-center justify-center flex-1"
+            className="flex flex-col text-center items-center justify-center flex-1"
           >
-            <div className=" flex flex-col justify-center items-center gap-4">
-              <Image src={ayna} alt="ayna" width={300} height={300} />
-              <div className="text-5xl font-light">
+            <div className="flex flex-col justify-center items-center gap-4">
+              {/* Responsive Image */}
+              <Image
+                src={ayna}
+                alt="ayna"
+                width={300}
+                height={300}
+                className="h-30 w-auto sm:h-40 md:h-50"
+              />
+              {/* Responsive Text */}
+              <div className="text-2xl sm:text-3xl md:text-5xl font-light">
                 Start chatting with our&nbsp;
-                <span className=" font-semibold text-primary">AI Chatbot</span>
+                <span className="font-semibold text-primary">AI Chatbot</span>
                 &nbsp;!
               </div>
-              <div className="flex items-center justify-center flex-1 text-lg font-light">
+              <div className="text-sm sm:text-base md:text-lg font-light">
                 Ask me anything!
               </div>
             </div>
           </motion.div>
         ) : (
-          <div className=" flex flex-1 flex-col gap-1">
+          <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto overflow-x-hidden gap-1">
             {chat.map((item) => (
               <ChatMessage key={item.id} {...item} />
             ))}

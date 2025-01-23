@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import axiosInstance from "@/lib/axiosInstance";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -41,11 +40,15 @@ const Signup = () => {
 
   async function onSubmit(values: z.infer<typeof signupSchema>) {
     try {
-      const response = await axiosInstance.post("/api/auth/local", {
-        username: values.name,
-        email: values.email,
-        password: values.password,
-      });
+      const bakcendUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+      const response = await axios.post(
+        `${bakcendUrl}/api/auth/local/register`,
+        {
+          username: values.name,
+          email: values.email,
+          password: values.password,
+        }
+      );
 
       const { jwt, user } = response.data;
 

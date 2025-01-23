@@ -119,7 +119,7 @@ const ChatWindow = ({ sessionId }: { sessionId: string }) => {
 
   return (
     <>
-      <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden gap-1">
+      <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto overflow-x-hidden gap-1">
         {chat.map((item) => (
           <ChatMessage key={item.id} {...item} />
         ))}
