@@ -24,7 +24,7 @@ const Page = () => {
       return;
     }
 
-    const socket = io("http://localhost:1337", {
+    const socket = io(process.env.NEXT_PUBLIC_BACKEND_BASE_URL, {
       extraHeaders: {
         Authorization: `Bearer ${token}`,
       },

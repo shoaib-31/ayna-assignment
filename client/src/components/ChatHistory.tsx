@@ -13,6 +13,7 @@ interface Session {
 const ChatHistory = () => {
   const [sessionData, setSessionData] = useState<Session[]>([]);
   const [isVisible, setIsVisible] = useState(false); // State to toggle visibility
+  const [isLoading, setIsLoading] = useState(true); // State to track loading status
 
   const loadHistory = async () => {
     try {
@@ -24,6 +25,8 @@ const ChatHistory = () => {
       setSessionData(data.data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsLoading(false); // Set loading to false after data is fetched or if there's an error
     }
   };
 
@@ -87,11 +90,17 @@ const ChatHistory = () => {
             </button>
           </div>
           <div className="custom-scrollbar flex flex-1 flex-col divide-y overflow-y-auto h-full">
-            {sessionData.length == 0 ? (
+            {isLoading ? (
               <div className="w-full h-full flex-col gap-2 flex items-center justify-center">
                 <LoaderCircle className="animate-spin text-primary w-16 h-16" />
                 <p className="text-sm md:text-base text-gray-700">
                   Loading History...
+                </p>
+              </div>
+            ) : sessionData.length === 0 ? (
+              <div className="w-full h-full flex-col gap-2 flex items-center justify-center">
+                <p className="text-sm md:text-base text-gray-700">
+                  No chat history available.
                 </p>
               </div>
             ) : (
