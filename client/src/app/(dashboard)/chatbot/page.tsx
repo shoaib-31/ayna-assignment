@@ -73,20 +73,24 @@ const Page = () => {
       return;
     }
     try {
-      // Fetch or create a session if not already created
-      if (session == null) {
+      let currentSession = session; // Use a local variable to track the session
+
+      // Create a new session if none exists
+      if (currentSession == null) {
         const newSession = (await axiosInstance.post("/api/sessions")).data
           .data;
-        setSession(newSession);
+        currentSession = newSession.id; // Update local variable
+        setSession(currentSession); // Update state
       }
 
-      // Send message to the WebSocket server
+      // Emit the message with the correct session ID
       socketRef.current?.emit("message", {
-        sessionId: session,
+        sessionId: currentSession,
         content: text,
       });
+
       if (chat.length <= 2) {
-        window.history.pushState({}, "", `/chatbot/${session}`);
+        window.history.pushState({}, "", `/chatbot/${currentSession}`);
       }
       setText("");
     } catch (error) {
