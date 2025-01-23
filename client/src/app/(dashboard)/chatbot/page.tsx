@@ -1,41 +1,93 @@
 "use client";
+
 import InputArea from "@/components/InputArea";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ayna from "@/assets/ayna.svg";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatMessage from "@/components/ChatMessage";
 import { Chat } from "@/interfaces/chat";
+import { io, Socket } from "socket.io-client";
+import axiosInstance from "@/lib/axiosInstance";
 
 const Page = () => {
-  const handleSend = async () => {
-    setChat((prev) => [
-      ...prev,
-      {
-        id: (Math.random() * 1000).toString().toString(),
-        message: text,
-        role: "user",
-        timestamp: new Date(),
-      },
-    ]);
-    setText("");
-    await new Promise((resolve) =>
-      setTimeout(() => resolve({ message: "Data Loaded!" }), 2000)
-    );
-    const { data, chatId }: { data: Chat; chatId: string } = {
-      data: {
-        id: (Math.random() * 1000).toString(),
-        message: "chatbot",
-        role: "bot",
-        timestamp: new Date(),
-      },
-      chatId: (Math.random() * 1000).toString(),
-    };
-    setChat((prev) => [...prev, data]);
-    window.history.pushState({}, "", `/chatbot/${chatId}`);
-  };
   const [text, setText] = useState("");
   const [chat, setChat] = useState<Chat[]>([]);
+  const socketRef = useRef<Socket | null>(null);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+
+    if (!token) {
+      console.error("JWT token not found in localStorage.");
+      return;
+    }
+
+    const socket = io("http://localhost:1337", {
+      extraHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    socketRef.current = socket;
+
+    // Handle incoming messages from the server
+    socket.on("message", (data) => {
+      console.log("Received message from server:", data);
+
+      const messageData = data.data.data; // Correctly access the inner 'data'
+
+      setChat((prev) => [
+        ...prev,
+        {
+          id: messageData.id,
+          message: messageData.content,
+          role: messageData.role,
+          timestamp: new Date(messageData.createdAt), // Use the correct 'createdAt'
+        },
+      ]);
+    });
+
+    // Handle errors
+    socket.on("error", (err) => {
+      console.error("WebSocket error:", err);
+    });
+
+    // Handle disconnection
+    socket.on("disconnect", () => {
+      console.log("Disconnected from WebSocket server");
+    });
+
+    return () => {
+      // Clean up on component unmount
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleSend = async () => {
+    const token = localStorage.getItem("jwt");
+
+    if (!token) {
+      alert("JWT token not found in localStorage.");
+      return;
+    }
+    try {
+      // Fetch or create a session if not already created
+      const session = (await axiosInstance.post("/api/sessions")).data.data;
+
+      // Send message to the WebSocket server
+      socketRef.current?.emit("message", {
+        sessionId: session.id,
+        content: text,
+      });
+      window.history.pushState({}, "", `/chatbot/${session.id}`);
+      setText("");
+    } catch (error) {
+      console.error("Error while sending message:", error);
+    }
+  };
+
   return (
     <div className="border bg-white rounded-lg flex-1 flex flex-col shadow-md p-4">
       <AnimatePresence>

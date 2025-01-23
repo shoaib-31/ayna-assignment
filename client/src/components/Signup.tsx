@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import axiosInstance from "@/lib/axiosInstance";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 // Define Zod schema for validation
 const signupSchema = z.object({
@@ -34,10 +37,35 @@ const Signup = () => {
       password: "",
     },
   });
+  const router = useRouter();
 
-  function onSubmit(values: z.infer<typeof signupSchema>) {
-    // Do something with the form values.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof signupSchema>) {
+    try {
+      const response = await axiosInstance.post("/api/auth/local", {
+        username: values.name,
+        email: values.email,
+        password: values.password,
+      });
+
+      const { jwt, user } = response.data;
+
+      localStorage.setItem("jwt", jwt);
+
+      console.log("Signup successful:", user);
+
+      router.push("/");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Signup failed:", error.response?.data || error.message);
+        alert(error.response?.data?.error?.message || "Signup failed");
+      } else if (error instanceof Error) {
+        console.error("Unexpected error:", error.message);
+        alert("An unexpected error occurred. Please try again.");
+      } else {
+        console.error("Unknown error:", error);
+        alert("An unknown error occurred. Please contact support.");
+      }
+    }
   }
   const [showPassword, setShowPassword] = useState(false);
 
