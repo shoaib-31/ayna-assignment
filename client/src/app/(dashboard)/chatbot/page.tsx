@@ -14,7 +14,7 @@ const Page = () => {
   const [text, setText] = useState("");
   const [chat, setChat] = useState<Chat[]>([]);
   const socketRef = useRef<Socket | null>(null);
-
+  const [session, setSession] = useState(null);
   // Initialize WebSocket connection
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -74,14 +74,20 @@ const Page = () => {
     }
     try {
       // Fetch or create a session if not already created
-      const session = (await axiosInstance.post("/api/sessions")).data.data;
+      if (session == null) {
+        const newSession = (await axiosInstance.post("/api/sessions")).data
+          .data;
+        setSession(newSession);
+      }
 
       // Send message to the WebSocket server
       socketRef.current?.emit("message", {
-        sessionId: session.id,
+        sessionId: session,
         content: text,
       });
-      window.history.pushState({}, "", `/chatbot/${session.id}`);
+      if (chat.length <= 2) {
+        window.history.pushState({}, "", `/chatbot/${session}`);
+      }
       setText("");
     } catch (error) {
       console.error("Error while sending message:", error);
